@@ -1,0 +1,53 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Kanit&display=swap');
+@import "tailwindcss";
+
+
+*{
+  font-family: "Kanit", sans-serif;
+  font-style: normal;
+}
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 6px; /* ความกว้างของแถบ */
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #111827; /* สีพื้นหลัง track (Match กับ bg-gray-900) */
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #374151; /* สีของตัวเลื่อน (gray-700) */
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f59e0b; /* เปลี่ยนเป็นสีส้ม Amber เมื่อเอาเมาส์ไปชี้ */
+  }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  animation: marquee 15s linear infinite; /* ปรับ 15s ให้ช้าหรือเร็วตามใจชอบ */
+}
+
+/* หยุดวิ่งเมื่อเอาเมาส์ไปวาง */
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+.animate-progress {
+  animation: progress 3000ms linear forwards;
+}
