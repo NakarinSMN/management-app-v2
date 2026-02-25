@@ -25,7 +25,7 @@ export default function Menu({ activeTab, setActiveTab }) {
   const [showToast, setShowToast] = useState(false);
 
   const handleConfirm = () => {
-    if (password === "1234") {
+    if (password === "240444") {
       setActiveTab("developer-page");
       setIsDevModalOpen(false);
       setPassword("");
@@ -123,86 +123,97 @@ export default function Menu({ activeTab, setActiveTab }) {
         message="Successfully saved!"
         subMessage="Anyone with a link can now view this file."
       />
+
       {isDevModalOpen && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
+          {/* 1. Backdrop: ใช้สีขาวโปร่งแสง + Blur ขั้นสุด */}
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+            className="absolute inset-0 bg-white/10 backdrop-blur-xs animate-in fade-in duration-500"
             onClick={() => {
               setIsDevModalOpen(false);
               setError(false);
               setPassword("");
             }}
           />
-          <div className="relative bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl border border-slate-100 p-8 animate-in zoom-in-95 duration-300">
+
+          {/* 2. Modal Card: ขอบโค้งมนพิเศษ และเส้นขอบจางๆ */}
+          <div className="relative bg-white w-full max-w-[340px] rounded-[3rem] border border-gray-100 p-10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] animate-in zoom-in-95 duration-300">
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-5">
-                <Code2 size={40} className="text-blue-500" />
+              {/* ส่วนไอคอน: เปลี่ยนเป็นวงกลมเส้นประจางๆ */}
+              <div className="w-20 h-20 border border-dashed border-gray-200 rounded-full flex items-center justify-center mb-6">
+                <Code2 size={32} strokeWidth={1} className="text-gray-400" />
               </div>
 
-              <h3 className="text-xl font-bold text-slate-800">ยืนยันตัวตน</h3>
-              <p className="text-sm text-slate-400 mb-6">
-                กรุณากรอกรหัสผ่านเพื่อดูข้อมูล
+              <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">
+                Developer Access
+              </h3>
+              <p className="text-sm font-medium text-gray-800 mb-10">
+                กรุณายืนยันรหัสผ่านผู้พัฒนา
               </p>
 
-              {/* Password Input Group */}
-              <div className="w-full mb-6 relative group">
-                <div
-                  className={`
-            flex items-center bg-slate-50 border-2 transition-all duration-300 rounded-2xl px-4 py-1
-            ${error ? "border-red-300 bg-red-50" : "border-transparent focus-within:border-blue-400 focus-within:bg-white"}
-          `}
-                >
-                  <Lock
-                    size={18}
-                    className={`${error ? "text-red-400" : "text-slate-400"} mr-2`}
-                  />
-
+              {/* 3. Password Input: สไตล์มินิมอล (Centered Ghost Input) */}
+              <div className="w-full mb-10 relative">
+                <div className="relative">
                   <input
+                    autoFocus
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
                       if (error) setError(false);
                     }}
-                    placeholder="กรอกรหัสผ่าน..."
-                    className="bg-transparent w-full py-3 text-sm outline-none text-slate-700 placeholder:text-slate-300"
+                    placeholder="••••"
+                    className={`
+                w-full bg-transparent text-center text-2xl tracking-[0.5em] py-2 border-b-2 transition-all duration-500 outline-none
+                ${
+                  error
+                    ? "border-red-200 text-red-500 placeholder:text-red-200"
+                    : "border-gray-100 text-gray-900 placeholder:text-gray-200 focus:border-gray-900"
+                }
+              `}
                   />
 
+                  {/* Toggle Show Password: วางไว้มุมขวาแบบจางๆ */}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-slate-300 hover:text-slate-500 transition-colors"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-900 transition-colors"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? (
+                      <EyeOff size={16} strokeWidth={1.5} />
+                    ) : (
+                      <Eye size={16} strokeWidth={1.5} />
+                    )}
                   </button>
                 </div>
 
                 {/* Error Message */}
                 {error && (
-                  <span className="absolute -bottom-5 left-4 text-[10px] text-red-500 font-medium animate-in slide-in-from-top-1">
-                    รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่
+                  <span className="absolute -bottom-6 left-0 w-full text-[10px] text-red-500 font-bold uppercase tracking-tighter animate-in fade-in slide-in-from-top-2">
+                    รหัสผ่านไม่ถูกต้อง
                   </span>
                 )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 w-full mt-2">
+              {/* 4. Action Buttons: ใช้ปุ่มแบบ Ghost และปุ่มหลักที่ดูเบาขึ้น */}
+              <div className="flex flex-col w-full gap-2">
+                <button
+                  onClick={handleConfirm}
+                  disabled={!password}
+                  className="w-full py-4 bg-gray-900 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-2xl hover:bg-blue-600 transition-all duration-300 active:scale-95 disabled:opacity-20 shadow-lg shadow-gray-200"
+                >
+                  Confirm Access
+                </button>
+
                 <button
                   onClick={() => {
                     setIsDevModalOpen(false);
                     setError(false);
                     setPassword("");
                   }}
-                  className="flex-1 py-3 text-slate-400 font-bold rounded-2xl hover:bg-slate-50 transition-all active:scale-95"
+                  className="w-full py-3 text-[10px] font-bold text-gray-300 hover:text-gray-500 uppercase tracking-widest transition-all"
                 >
-                  ยกเลิก
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  className="flex-[2] py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-200 active:scale-95 disabled:opacity-50"
-                  disabled={!password}
-                >
-                  เข้าสู่ระบบ
+                  Cancel
                 </button>
               </div>
             </div>
@@ -223,26 +234,13 @@ export default function Menu({ activeTab, setActiveTab }) {
               />
               <div className="flex flex-col">
                 <span className="text-md font-bold text-slate-700 tracking-tight">
-                  GOOD DEV
+                  ตรอ.บังรีท่าอิฐ
                 </span>
                 <span className="text-[10px] text-slate-400 uppercase font-medium">
                   user
                 </span>
               </div>
             </div>
-
-            <button
-              onClick={hdlLogin}
-              className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-blue-50 transition-colors group"
-            >
-              <LogInIcon
-                className="text-blue-500 group-hover:scale-110 transition-transform"
-                size={20}
-              />
-              <span className="text-[10px] text-slate-400 uppercase font-bold leading-tight">
-                Login
-              </span>
-            </button>
           </div>
         </div>
 
