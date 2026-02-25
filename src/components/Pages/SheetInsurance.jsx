@@ -1,9 +1,9 @@
-
+import MainContent from "../CalenderDate/MainContent";
 
 export default function SheetInsurance() {
   return (
     <div>
-      SheetInsurance
+      <MainContent />
     </div>
-  )
+  );
 }
