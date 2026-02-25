@@ -9,7 +9,7 @@ import MotorcycleBill from "../Pages/MotorcycleBill";
 import OrtherBill from "../Pages/OrtherBill";
 import ItemsShop from "../Pages/ItemsShop";
 import DevPage from "../Pages/DevPage";
-import Insurance from "../Pages/Insurance";
+import SheetInsurance from "../Pages/SheetInsurance";
 
 // 1. Import คอมโพเนนต์จากไฟล์ภายนอกเข้ามา
 
@@ -21,7 +21,7 @@ export default function Contents({ activeTab }) {
     "notification-board": <NotificationBoard />,
     "insurance-work": <InsuranceWork />,
     "tax-cover-sheet": <TaxCoverSheet />,
-    "insurance": <Insurance/>,
+    "insurance": <SheetInsurance/>,
     "car-bill": <CarBill />,
     "motorcycle-bill": <MotorcycleBill />,
     "orther-bill": <OrtherBill />,
