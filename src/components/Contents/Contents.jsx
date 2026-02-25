@@ -4,12 +4,12 @@ import VehicleTax from "../Pages/VehicleTax";
 import NotificationBoard from "../Pages/NotificationBoard";
 import InsuranceWork from "../Pages/InsuranceWork";
 import TaxCoverSheet from "../Pages/TaxCoverSheet";
-import Insurance from "../Pages/insurance";
 import CarBill from "../Pages/CarBill";
 import MotorcycleBill from "../Pages/MotorcycleBill";
 import OrtherBill from "../Pages/OrtherBill";
 import ItemsShop from "../Pages/ItemsShop";
 import DevPage from "../Pages/DevPage";
+import Insurance from "../Pages/Insurance";
 
 // 1. Import คอมโพเนนต์จากไฟล์ภายนอกเข้ามา
 
@@ -21,7 +21,7 @@ export default function Contents({ activeTab }) {
     "notification-board": <NotificationBoard />,
     "insurance-work": <InsuranceWork />,
     "tax-cover-sheet": <TaxCoverSheet />,
-    "insurance": <Insurance />,
+    "insurance": <Insurance/>,
     "car-bill": <CarBill />,
     "motorcycle-bill": <MotorcycleBill />,
     "orther-bill": <OrtherBill />,
