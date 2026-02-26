@@ -1,8 +1,7 @@
-import React from "react";
-// นำเข้า Icon จาก lucide-react เพื่อใช้ตกแต่ง
+import React, { memo, useMemo } from "react";
 import { CalendarDays, ArrowRight, Car, Truck, Bike, ShieldCheck } from "lucide-react";
 
-// ข้อมูลตั้งต้น: แนบ Icon ให้ตรงกับประเภทรถ
+// ข้อมูลตั้งต้น: อยู่นอก Component ถูกต้องแล้วครับ!
 const vehicleTypes = [
   { name: "รย.1 (รถยนต์นั่ง)", basePrice: 645.41, icon: Car },
   { name: "รย.2 (รถโดยสาร)", basePrice: 1182.55, icon: Car },
@@ -17,22 +16,30 @@ const vehicleTypes = [
   { name: "รย.12 (ขนาดเกิน 150 ซีซี)", basePrice: 645.41, icon: Bike },
 ];
 
-export default function Summery({ startDate, endDate }) {
-  const diffDays = endDate.diff(startDate, "day");
-  const validDays = diffDays > 0 ? diffDays : 0;
+// 1. ใส่โล่ memo ป้องกันการ Re-render พร่ำเพรื่อ
+const Summery = memo(function Summery({ startDate, endDate }) {
+  
+  // 2. ใช้ useMemo เพื่อจำค่าผลลัพธ์ไว้ จะได้ไม่ต้องคำนวณใหม่ถ้าวันที่ยังเป็นค่าเดิม
+  const { validDays, multiplier } = useMemo(() => {
+    const diffDays = endDate.diff(startDate, "day");
+    const valid = diffDays > 0 ? diffDays : 0;
+    
+    return {
+      validDays: valid,
+      multiplier: valid / 365 // ดึงตัวคูณออกมาคำนวณแค่ครั้งเดียว ประหยัด CPU!
+    };
+  }, [startDate, endDate]);
 
+  // ฟังก์ชันคำนวณราคาที่เบาขึ้นมาก
   const calculatePrice = (basePrice) => {
-    const price = (validDays / 365) * basePrice;
-    return price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (basePrice * multiplier).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   return (
     <div className="w-full">
       
-      {/* 1. ส่วนแสดงวันที่ (แบบคลีน ไร้กรอบทึบ) */}
+      {/* ส่วนแสดงวันที่ */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-gray-200 border-dashed">
-        
-        {/* กลุ่มวันที่พร้อม Icon */}
         <div className="flex items-center gap-3 text-gray-800">
           <CalendarDays className="w-5 h-5 text-gray-400" />
           <span className="font-medium text-gray-800">
@@ -44,7 +51,6 @@ export default function Summery({ startDate, endDate }) {
           </span>
         </div>
 
-        {/* ป้ายกำกับจำนวนวันแบบ Capsule มินิมอล */}
         <div className="px-3 py-1 bg-gray-100 text-gray-500 text-sm font-medium rounded-full">
           {validDays} วัน
         </div>
@@ -56,10 +62,9 @@ export default function Summery({ startDate, endDate }) {
         <h2 className="text-base font-bold text-gray-800">อัตราเบี้ยประกัน</h2>
       </div>
 
-      {/* 2. ลิสต์รายการรถและราคา */}
+      {/* ลิสต์รายการรถและราคา */}
       <div className="flex flex-col">
         {vehicleTypes.map((vehicle, index) => {
-          // ดึง Icon ของแต่ละคันออกมา
           const VehicleIcon = vehicle.icon;
 
           return (
@@ -69,7 +74,6 @@ export default function Summery({ startDate, endDate }) {
                 index !== vehicleTypes.length - 1 ? "border-b border-gray-100" : ""
               }`}
             >
-              {/* ฝั่งซ้าย: Icon + ชื่อประเภทรถ */}
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gray-50 rounded-lg text-gray-400 group-hover:text-gray-700 group-hover:bg-gray-100 transition-colors">
                   <VehicleIcon className="w-4 h-4" />
@@ -79,7 +83,6 @@ export default function Summery({ startDate, endDate }) {
                 </span>
               </div>
 
-              {/* ฝั่งขวา: ราคา */}
               <div className="text-right">
                 <span className="text-sm font-medium text-gray-500">
                   {calculatePrice(vehicle.basePrice)}
@@ -93,4 +96,6 @@ export default function Summery({ startDate, endDate }) {
       
     </div>
   );
-}
+});
+
+export default Summery;
