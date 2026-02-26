@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-// 1. Lazy Import (ถูกต้องแล้ว)
+// 1. Lazy Import
 const HomePage = lazy(() => import("../HomePage/HomePage"));
 const VehicleTax = lazy(() => import("../VehicleTax/VehicleTax"));
 const NotificationBoard = lazy(() => import("../NotificationBoard/NotificationBoard"));
@@ -14,7 +14,8 @@ const ItemsShop = lazy(() => import("../ItemsShop/ItemsShop"));
 const DevPage = lazy(() => import("../DevPage/DevPage"));
 const SheetInsurance = lazy(() => import("../SheetInsurance/SheetInsurance"));
 
-export default function Contents() {
+// 2. รับ isAuthenticated เข้ามา
+export default function Contents({ isAuthenticated }) {
   return (
     <div className="p-8 h-full overflow-y-auto custom-scrollbar">
       <div className="transition-all duration-300">
@@ -27,9 +28,14 @@ export default function Contents() {
           }
         >
           <Routes>
-            {/* 3. จัดการด้วย Routes ล้วนๆ ไปเลย */}
             <Route path="/" element={<HomePage />} />
-            <Route path="/vehicle-tax" element={<VehicleTax />} />
+            
+            {/* 3. ส่ง isAuthenticated ต่อไปให้หน้า VehicleTax */}
+            <Route 
+              path="/vehicle-tax" 
+              element={<VehicleTax isAuthenticated={isAuthenticated} />} 
+            />
+            
             <Route path="/notification-board" element={<NotificationBoard />} />
             <Route path="/insurance-work" element={<InsuranceWork />} />
             <Route path="/tax-cover-sheet" element={<TaxCoverSheet />} />
@@ -40,7 +46,6 @@ export default function Contents() {
             <Route path="/items" element={<ItemsShop />} />
             <Route path="/developer-page" element={<DevPage />} />
 
-            {/* ถ้าหา URL ไม่เจอ ให้เด้งไปหน้าแรก */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

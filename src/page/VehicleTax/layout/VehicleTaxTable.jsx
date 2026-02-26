@@ -1,8 +1,9 @@
 import React from "react";
 import { ArrowLeft, ArrowRight, ExternalLink, Phone, CalendarCheck, ClipboardCheck } from "lucide-react";
-import { vehicleTaxData } from "../mockData"; // Import ข้อมูลมาใช้งาน
+import { vehicleTaxData } from "../mockData"; 
 
-export default function VehicleTaxTable() {
+// รับ isAuthenticated มาจาก VehicleTax
+export default function VehicleTaxTable({ isAuthenticated }) {
   const headers = ["ลำดับ", "ทะเบียนรถ", "ประเภท / ยี่ห้อ", "ชื่อลูกค้า / เบอร์โทร", "ชำระล่าสุด", "วันตรวจ ตรอ.", "สถานะ", ""];
 
   return (
@@ -65,15 +66,19 @@ export default function VehicleTaxTable() {
                   </div>
                 </td>
                 <td className="px-4 py-2 text-right">
-                  <button className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all">
-                    <ExternalLink size={14} />
-                  </button>
+                  {/* เช็กเงื่อนไข: ซ่อนปุ่มแก้ไขถ้าไม่ใช่ Admin */}
+                  {isAuthenticated && (
+                    <button className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all">
+                      <ExternalLink size={14} />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      
       {/* ส่วน Pagination... คงไว้เหมือนเดิม */}
     </div>
   );

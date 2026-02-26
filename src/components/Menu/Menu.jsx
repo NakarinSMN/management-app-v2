@@ -6,23 +6,30 @@ import {
   BriefcaseBusiness, 
   ToolCase, 
   ReceiptText, 
-  Code2 
+  Code2,
+  LogOut,
+  Settings,
+  ShieldCheck,
+  MessageSquare,
+  ChevronUp,
+  CircleUser,
+  Lock // เพิ่ม Icon Lock สำหรับปุ่ม Login
 } from "lucide-react";
 import MenuButton from "../GlobalButton/MenuButton";
 import SubmenuGroup from "../GlobalButton/SubmenuGroup";
 import Toast from "../Notify/Toast";
-import { useState, lazy, Suspense } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // เอาบรรทัดที่ซ้ำกันออกแล้ว
+import { useState, lazy, Suspense, useRef, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // 1. Lazy Load ตัว Modal
 const DevModal = lazy(() => import("../Modal/DevModal"));
 
-// 2. ข้อมูลเมนู (อยู่นอก Component ประหยัด RAM)
+// 2. ข้อมูลเมนู
 const menuList = [
   { id: "home", title: "หน้าหลัก", subtitle: "Home", icon: Home },
   {
     id: "data-tax",
-    title: "งานภาษีขอมูลลูกค้า",
+    title: "งานภาษีข้อมูลลูกค้า",
     subtitle: "Invoice & Tax",
     icon: Tags,
     children: [
@@ -69,32 +76,37 @@ const menuOthers = [
   { id: "developer-page", title: "ผู้พัฒนา", subtitle: "Developer Page", icon: Code2 },
 ];
 
-// 3. เริ่ม Component หลัก
-export default function Menu() {
+export default function Menu({ isAuthenticated, onOpenLogin }) {
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
-
+  const [isProfileOpen, setIsProfileOpen] = useState(false); 
+  
+  const profileRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // แปลง URL ให้กลายเป็น activeTab เพื่อใช้กับปุ่ม
-  const activeTab = location.pathname === "/" ? "home" : location.pathname.substring(1);
+  // ใช้ Location จาก Router โดยตรง
+  const currentTab = location.pathname === "/" ? "home" : location.pathname.substring(1);
 
-  // ฟังก์ชันเปลี่ยนหน้า
   const handleNavigate = (id) => {
     navigate(id === "home" ? "/" : `/${id}`);
+    setIsProfileOpen(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
-      <Toast
-        isOpen={showToast}
-        onClose={() => setShowToast(false)}
-        type="success"
-        message="Developer Mode Activated"
-      />
+      <Toast isOpen={showToast} onClose={() => setShowToast(false)} type="success" message="Developer Mode Activated" />
 
-      {/* Lazy Load Modal (โหลดเฉพาะตอนจะใช้) */}
       {isDevModalOpen && (
         <Suspense fallback={null}>
           <DevModal 
@@ -109,7 +121,7 @@ export default function Menu() {
       )}
 
       {/* Sidebar UI */}
-      <div className="flex flex-col h-screen w-70 bg-slate-50 text-slate-800 shadow-xl border-r border-slate-200">
+      <div className="flex flex-col h-screen w-70 bg-slate-50 text-slate-800 shadow-xl border-r border-slate-200 relative">
         
         {/* Header โลโก้ & User */}
         <div className="relative h-24 shrink-0 border-b border-blue-100 bg-white flex items-center px-6">
@@ -121,53 +133,97 @@ export default function Menu() {
             />
             <div className="flex flex-col">
               <span className="text-md font-bold text-slate-700 tracking-tight">ตรอ.บังรีท่าอิฐ</span>
-              <span className="text-[10px] text-slate-400 uppercase font-medium">user</span>
+              <span className="text-[10px] text-slate-400 uppercase font-medium">
+                {isAuthenticated ? "Admin Access" : "Guest Mode"}
+              </span>
             </div>
           </div>
         </div>
 
         {/* รายการเมนู */}
         <div className="flex-1 overflow-y-auto p-4 space-y-1.5 custom-scrollbar">
-          
-          {/* Loop เมนูหลัก */}
           {menuList.map((item) =>
             item.children ? (
-              <SubmenuGroup 
-                key={item.id} 
-                item={item} 
-                activeTab={activeTab} 
-                setActiveTab={handleNavigate} 
-              />
+              <SubmenuGroup key={item.id} item={item} activeTab={currentTab} setActiveTab={handleNavigate} />
             ) : (
-              <MenuButton 
-                key={item.id} 
-                icon={item.icon} 
-                title={item.title} 
-                subtitle={item.subtitle} 
-                isActive={activeTab === item.id} 
-                onClick={() => handleNavigate(item.id)} 
-              />
+              <MenuButton key={item.id} icon={item.icon} title={item.title} subtitle={item.subtitle} isActive={currentTab === item.id} onClick={() => handleNavigate(item.id)} />
             )
           )}
 
-          {/* ตัวคั่น */}
           <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-center">
             - Others -
           </div>
 
-          {/* Loop เมนูอื่นๆ (อย่างเช่นหน้า Developer) */}
           {menuOthers.map((item) => (
             <MenuButton
               key={item.id}
               icon={item.icon}
               title={item.title}
               subtitle={item.subtitle}
-              isActive={activeTab === item.id}
+              isActive={currentTab === item.id}
               onClick={() => item.id === "developer-page" ? setIsDevModalOpen(true) : handleNavigate(item.id)}
             />
           ))}
-          
         </div>
+
+        {/* --- ส่วนล่างสุด: แสดงผลตามสถานะ Login --- */}
+        <div className="p-4 border-t border-slate-200 bg-white/50 relative" ref={profileRef}>
+          {isAuthenticated ? (
+            <>
+              {/* Admin Mode: แสดง Profile และเมนู Sign Out */}
+              {isProfileOpen && (
+                <div className="absolute bottom-full left-4 right-4 mb-2 bg-white rounded-2xl border border-slate-100 shadow-2xl py-2 animate-in fade-in slide-in-from-bottom-2 duration-300 z-50">
+                  <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <CircleUserRound size={16} className="text-slate-400" /> My profile
+                  </button>
+                  <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <Settings size={16} className="text-slate-400" /> Settings
+                  </button>
+                  <div className="h-px bg-slate-100 my-1 mx-2" />
+                  <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <ShieldCheck size={16} className="text-slate-400" /> Privacy policy
+                  </button>
+                  <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <MessageSquare size={16} className="text-slate-400" /> Share feedback
+                  </button>
+                  <div className="h-px bg-slate-100 my-1 mx-2" />
+                  <button 
+                    onClick={() => { sessionStorage.clear(); window.location.reload(); }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors font-bold"
+                  >
+                    <LogOut size={16} /> Sign out
+                  </button>
+                </div>
+              )}
+
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all duration-300 ${isProfileOpen ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500 shadow-inner flex items-center justify-center text-white">
+                    <CircleUser size={24} />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-sm font-bold text-slate-700 leading-none">Admin</span>
+                    <span className="text-[10px] text-slate-400 font-medium truncate w-32">bangree@example.com</span>
+                  </div>
+                </div>
+                <ChevronUp size={16} className={`text-slate-300 transition-transform duration-500 ${isProfileOpen ? 'rotate-180' : ''}`} />
+              </button>
+            </>
+          ) : (
+            /* Guest Mode: แสดงปุ่ม Login */
+            <button 
+              onClick={onOpenLogin}
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-gray-900 text-white rounded-2xl hover:bg-blue-600 transition-all duration-300 active:scale-95 shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+            >
+              <Lock size={16} className="text-white/80" />
+              <span className="text-sm font-bold tracking-wide">เข้าสู่ระบบ (Login)</span>
+            </button>
+          )}
+        </div>
+
       </div>
     </>
   );
