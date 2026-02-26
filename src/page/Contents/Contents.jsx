@@ -2,17 +2,17 @@ import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // 1. Lazy Import (ถูกต้องแล้ว)
-const HomePage = lazy(() => import("../HomePage"));
-const VehicleTax = lazy(() => import("../VehicleTax"));
-const NotificationBoard = lazy(() => import("../NotificationBoard"));
-const InsuranceWork = lazy(() => import("../InsuranceWork"));
-const TaxCoverSheet = lazy(() => import("../TaxCoverSheet"));
-const CarBill = lazy(() => import("../CarBill"));
-const MotorcycleBill = lazy(() => import("../MotorcycleBill"));
-const OrtherBill = lazy(() => import("../OrtherBill"));
-const ItemsShop = lazy(() => import("../ItemsShop"));
-const DevPage = lazy(() => import("../DevPage"));
-const SheetInsurance = lazy(() => import("../SheetInsurance"));
+const HomePage = lazy(() => import("../HomePage/HomePage"));
+const VehicleTax = lazy(() => import("../VehicleTax/VehicleTax"));
+const NotificationBoard = lazy(() => import("../NotificationBoard/NotificationBoard"));
+const InsuranceWork = lazy(() => import("../InsuranceWork/InsuranceWork"));
+const TaxCoverSheet = lazy(() => import("../TaxCoverSheet/TaxCoverSheet"));
+const CarBill = lazy(() => import("../Billing/CarBill"));
+const MotorcycleBill = lazy(() => import("../Billing/MotorcycleBill"));
+const OrtherBill = lazy(() => import("../Billing/OrtherBill"));
+const ItemsShop = lazy(() => import("../ItemsShop/ItemsShop"));
+const DevPage = lazy(() => import("../DevPage/DevPage"));
+const SheetInsurance = lazy(() => import("../SheetInsurance/SheetInsurance"));
 
 export default function Contents() {
   return (

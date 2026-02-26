@@ -8,8 +8,8 @@ import {
   ReceiptText, 
   Code2 
 } from "lucide-react";
-import MenuButton from "../GobalButton/MenuButton";
-import SubmenuGroup from "../GobalButton/SubmenuGroup";
+import MenuButton from "../GlobalButton/MenuButton";
+import SubmenuGroup from "../GlobalButton/SubmenuGroup";
 import Toast from "../Notify/Toast";
 import { useState, lazy, Suspense } from "react";
 import { useLocation, useNavigate } from "react-router-dom"; // เอาบรรทัดที่ซ้ำกันออกแล้ว

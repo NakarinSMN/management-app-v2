@@ -1,4 +1,4 @@
-import MainContent from "../components/CalenderDate/MainContent";
+import MainContent from "../../components/CalenderDate/MainContent";
 
 export default function SheetInsurance() {
   return (
