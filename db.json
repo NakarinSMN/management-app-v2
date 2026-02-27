@@ -1,0 +1,140 @@
+{
+  "vehicleTax": [
+    {
+      "id": "1772161880107",
+      "licensePlate": "เทสระบบ",
+      "brand": "Honda",
+      "customerName": "นครินทร์ แสงมาณี",
+      "phone": "0649936361",
+      "registerDate": "27/2/2026",
+      "note": "",
+      "day": 365,
+      "tags": [
+        "ภาษี",
+        "ตรอ."
+      ],
+      "vehicleType": "รย.1",
+      "inspectionDate": "27/2/2026",
+      "sequenceNumber": 1,
+      "createdAt": "2026-02-27T03:11:20.106Z",
+      "updatedAt": "2026-02-27T04:09:33.960Z"
+    },
+    {
+      "id": "1772161911614",
+      "licensePlate": "7ขอ5100กท",
+      "brand": "Honda",
+      "customerName": "นครินทร์ แสงมาณี",
+      "phone": "0649936361",
+      "registerDate": "27/6/2026",
+      "note": "",
+      "day": 365,
+      "tags": [
+        "ภาษี",
+        "พรบ.",
+        "ตรอ."
+      ],
+      "vehicleType": "fghfgh",
+      "inspectionDate": "20/5/2025",
+      "sequenceNumber": 1,
+      "createdAt": "2026-02-27T03:11:51.614Z",
+      "updatedAt": "2026-02-27T03:11:51.614Z"
+    },
+    {
+      "id": "1772161943093",
+      "licensePlate": "เทสระบบ",
+      "brand": "TOYOTA",
+      "customerName": "นครินทร์ แสงมาณี",
+      "phone": "0649936361",
+      "registerDate": "1/3/2026",
+      "note": "",
+      "day": 365,
+      "tags": [
+        "ภาษี",
+        "พรบ.",
+        "ตรอ."
+      ],
+      "vehicleType": "รย.1255",
+      "inspectionDate": "20/05/2026",
+      "sequenceNumber": 1,
+      "createdAt": "2026-02-27T03:12:23.093Z",
+      "updatedAt": "2026-02-27T03:56:30.591Z"
+    },
+    {
+      "id": "1772167058504",
+      "licensePlate": "เทสระบบ",
+      "brand": "TOYOTA",
+      "customerName": "นครินทร์ แสงมาณี",
+      "phone": "0649936361",
+      "registerDate": "25/8/2026",
+      "note": "",
+      "day": 365,
+      "tags": [
+        "ภาษี",
+        "พรบ.",
+        "ตรอ."
+      ],
+      "vehicleType": "หกด",
+      "inspectionDate": "15/5/2025",
+      "sequenceNumber": 1,
+      "createdAt": "2026-02-27T04:37:38.504Z",
+      "updatedAt": "2026-02-27T04:37:38.504Z"
+    },
+    {
+      "id": "1772167076758",
+      "licensePlate": "7ขอ5100กท",
+      "brand": "Honda",
+      "customerName": "นครินทร์ แสงมาณี",
+      "phone": "0649936361",
+      "registerDate": "1/3/2026",
+      "note": "",
+      "day": 365,
+      "tags": [
+        "ภาษี",
+        "พรบ."
+      ],
+      "vehicleType": "fghfgh",
+      "inspectionDate": "",
+      "sequenceNumber": "",
+      "createdAt": "2026-02-27T04:37:56.758Z",
+      "updatedAt": "2026-02-27T04:37:56.758Z"
+    },
+    {
+      "id": "1fcbd58a-3d60-4a33-a7d6-cd69dff0849f",
+      "licensePlate": "7ขอ5100กท",
+      "brand": "TOYOTA",
+      "customerName": "เจตน์สฤาฎิ์ พินันชัย",
+      "phone": "0649936360",
+      "registerDate": "27/2/2026",
+      "note": "",
+      "day": 365,
+      "tags": [
+        "ภาษี",
+        "พรบ."
+      ],
+      "vehicleType": "fghfgh",
+      "inspectionDate": "",
+      "sequenceNumber": 2,
+      "createdAt": "2026-02-27T04:45:29.893Z",
+      "updatedAt": "2026-02-27T04:45:29.893Z"
+    },
+    {
+      "id": "6abb4997-9dcd-47bb-8cff-580f9bc3dc73",
+      "licensePlate": "7ขอ5100กท",
+      "brand": "TOYOTA",
+      "customerName": "นครินทร์ แสงมาณี",
+      "phone": "0649936361",
+      "registerDate": "1/3/2026",
+      "note": "",
+      "day": 365,
+      "tags": [
+        "ภาษี",
+        "พรบ."
+      ],
+      "vehicleType": "fghfgh",
+      "inspectionDate": "",
+      "sequenceNumber": 3,
+      "createdAt": "2026-02-27T05:07:10.112Z",
+      "updatedAt": "2026-02-27T05:07:10.112Z"
+    }
+  ]
+}

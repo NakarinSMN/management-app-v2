@@ -1,51 +1,199 @@
-import React from "react";
-import { X, Save } from "lucide-react";
+import React, { useState } from "react";
+import { X, Save, Loader2, Calendar, Tag as TagIcon, Info } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid'; // 🌟 1. Import UUID เข้ามา
 
-export default function AddRecordModal({ isOpen, onClose }) {
+export default function AddRecordModal({ isOpen, onClose, onSuccess }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    licensePlate: "",
+    brand: "",
+    customerName: "",
+    phone: "",
+    registerDate: "",
+    note: "",
+    day: 365,
+    tags: [],
+    vehicleType: "",
+    inspectionDate: "",
+    sequenceNumber: 1
+  });
+
+  const availableTags = ["ภาษี", "พรบ.", "ตรอ."];
+
   if (!isOpen) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleTagToggle = (tag) => {
+    setFormData((prev) => {
+      const currentTags = prev.tags || [];
+      if (currentTags.includes(tag)) {
+        // 🌟 ถ้ายกเลิกแท็ก "ตรอ." ให้ล้างช่องวันที่ทิ้งด้วย
+        const updates = { tags: currentTags.filter(t => t !== tag) };
+        if (tag === "ตรอ.") updates.inspectionDate = "";
+        return { ...prev, ...updates };
+      } else {
+        return { ...prev, tags: [...currentTags, tag] };
+      }
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // 🌟 2. แอบดึงข้อมูลทั้งหมดมาดูก่อน เพื่อหาลำดับล่าสุด
+      const resAll = await fetch("http://localhost:5000/vehicleTax");
+      const allData = await resAll.json();
+
+      // หาค่า sequenceNumber ที่สูงที่สุดในฐานข้อมูล
+      let nextSequence = 1; // เริ่มต้นที่ 1 (กรณีไม่มีข้อมูลเลย)
+      if (allData.length > 0) {
+        // ใช้ Math.max เพื่อดึงเลขที่เยอะที่สุดออกมา แล้วบวก 1
+        const maxSeq = Math.max(...allData.map(item => item.sequenceNumber || 0));
+        nextSequence = maxSeq + 1;
+      }
+
+      const currentIsoTime = new Date().toISOString();
+      const payload = {
+        ...formData,
+        id: uuidv4(), // 🌟 3. ใช้ UUID สร้างรหัสอ้างอิงที่ไม่ซ้ำชัวร์ 100%
+        sequenceNumber: nextSequence, // 🌟 4. ใส่เลขลำดับที่คำนวณได้ลงไป
+        createdAt: currentIsoTime,
+        updatedAt: currentIsoTime,
+      };
+
+      // 🌟 5. ค่อยส่งข้อมูล (POST) ไปบันทึก
+      const response = await fetch("http://localhost:5000/vehicleTax", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const savedData = await response.json();
+        setFormData({ licensePlate: "", brand: "", customerName: "", phone: "", registerDate: "", note: "", day: 365, tags: [], vehicleType: "", inspectionDate: "", sequenceNumber: 1 });
+        onSuccess(savedData);
+      } else {
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+      alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // 🌟 เช็กว่าตอนนี้เลือกแท็ก "ตรอ." อยู่หรือเปล่า
+  const isTroSelected = formData.tags.includes("ตรอ.");
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-white/60 backdrop-blur-md animate-in fade-in duration-500" onClick={onClose}></div>
-      
-      {/* Modal Content */}
-      <div className="relative bg-white w-full max-w-xl rounded-[2.5rem] border border-gray-100 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] p-8 md:p-10 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
+
+      <div className="relative bg-white w-full max-w-2xl rounded-[2.5rem] border border-gray-100 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] p-8 md:p-10 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500 overflow-y-auto max-h-[90vh] custom-scrollbar">
         <button onClick={onClose} className="absolute top-8 right-8 text-gray-300 hover:text-gray-900 transition-colors">
           <X size={20} />
         </button>
 
-        <div className="mb-8">
-          <h3 className="text-xl font-black text-gray-900 tracking-tight">เพิ่มรายการใหม่</h3>
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-widest mt-1">Vehicle Tax Registration</p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h3 className="text-xl font-black text-gray-900 tracking-tight font-sans">เพิ่มรายการใหม่</h3>
+            <p className="text-[10px] text-blue-500 font-black uppercase tracking-[0.2em] mt-1">Vehicle Tax System</p>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 mt-2">
+            <Info size={12} className="text-blue-500" />
+            <span className="text-[9px] text-blue-600 font-bold uppercase tracking-widest">สถานะจะคำนวณอัตโนมัติจากวันจดทะเบียน</span>
+          </div>
         </div>
 
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">ทะเบียนรถ</label>
-            <input type="text" placeholder="กค 1234" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all" />
+            <input required name="licensePlate" value={formData.licensePlate} onChange={handleChange} type="text" placeholder="3กฬ4555กท" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-black text-gray-400 uppercase ml-1">จังหวัด</label>
-            <input type="text" placeholder="นนทบุรี" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all" />
+            <label className="text-[10px] font-black text-gray-400 uppercase ml-1">ประเภทรถ</label>
+            <input name="vehicleType" value={formData.vehicleType} onChange={handleChange} type="text" placeholder="รถเก๋ง / กระบะ" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0" />
           </div>
+
           <div className="flex flex-col gap-1.5 md:col-span-2">
             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">ชื่อลูกค้า</label>
-            <input type="text" placeholder="ระบุชื่อ-นามสกุล" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all" />
+            <input required name="customerName" value={formData.customerName} onChange={handleChange} type="text" placeholder="ระบุชื่อ-นามสกุล" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0" />
           </div>
+
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">เบอร์โทรศัพท์</label>
-            <input type="tel" placeholder="08x-xxx-xxxx" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all" />
+            <input name="phone" value={formData.phone} onChange={handleChange} type="tel" placeholder="08x-xxx-xxxx" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0" />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-black text-gray-400 uppercase ml-1">ยี่ห้อรถ</label>
-            <input type="text" placeholder="Toyota, Honda..." className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all" />
+            <input name="brand" value={formData.brand} onChange={handleChange} type="text" placeholder="Toyota, Honda..." className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0" />
+          </div>
+
+          <div className="flex flex-col gap-1.5 md:col-span-2 mt-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase ml-1 flex items-center gap-1">
+              <TagIcon size={10} /> บริการที่เลือก (เลือกได้หลายข้อ)
+            </label>
+            <div className="flex items-center gap-3 mt-1 flex-wrap">
+              {availableTags.map(tag => {
+                const isActive = formData.tags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => handleTagToggle(tag)}
+                    className={`px-5 py-2.5 rounded-xl text-[12px] font-black transition-all duration-300 border shadow-sm ${isActive
+                      ? 'bg-blue-50 text-blue-600 border-blue-200 ring-2 ring-blue-100 ring-offset-1'
+                      : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300 hover:text-gray-600 hover:-translate-y-0.5'
+                      }`}
+                  >
+                    {tag}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-black text-gray-400 uppercase ml-1 flex items-center gap-1">
+              <Calendar size={10} /> วันจดทะเบียน <span className="text-red-400 text-[8px]">(ใช้คำนวณสถานะ)</span>
+            </label>
+            <input name="registerDate" value={formData.registerDate} onChange={handleChange} type="text" placeholder="22/06/2025" className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0 font-bold text-gray-700" />
+          </div>
+
+          {/* 🌟 จุดที่ปรับปรุง: กล่องนี้จะซีดลงและกรอกไม่ได้ ถ้าไม่ได้เลือกแท็ก "ตรอ." */}
+          <div className={`flex flex-col gap-1.5 transition-all duration-300 ${!isTroSelected ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
+            <label className="text-[10px] font-black text-gray-400 uppercase ml-1 flex items-center gap-1">
+              <Calendar size={10} /> วันตรวจสภาพ (ตรอ.)
+            </label>
+            <input
+              name="inspectionDate"
+              value={formData.inspectionDate}
+              onChange={handleChange}
+              type="text"
+              disabled={!isTroSelected} // ป้องกันการกด
+              placeholder="20/05/2025"
+              className={`px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm outline-none transition-all border ${isTroSelected ? 'focus:bg-white focus:border-blue-500 focus:ring-0' : 'bg-gray-100 text-gray-400'}`}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase ml-1">หมายเหตุ</label>
+            <textarea name="note" value={formData.note} onChange={handleChange} rows="2" placeholder="รายละเอียดเพิ่มเติม..." className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0 resize-none" />
           </div>
 
           <div className="md:col-span-2 mt-6 flex gap-3">
             <button type="button" onClick={onClose} className="flex-1 py-4 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">ยกเลิก</button>
-            <button type="submit" className="flex-[2] py-4 bg-gray-900 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-all active:scale-95 shadow-xl shadow-gray-200">
-              <Save size={18} /> บันทึกข้อมูล
+            <button disabled={isSubmitting} type="submit" className="flex-[2] py-4 bg-gray-900 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-all active:scale-95 shadow-xl shadow-gray-200 disabled:bg-gray-400">
+              {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+              {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
             </button>
           </div>
         </form>
