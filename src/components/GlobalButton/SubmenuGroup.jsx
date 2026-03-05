@@ -57,7 +57,7 @@ export default function SubmenuGroup({ item, activeTab, setActiveTab }) {
                   />
 
                   <span
-                    className={`text-sm transition-colors duration-300 ${isActive ? "font-semibold" : "font-medium"}`}
+                    className={`text-xs transition-colors duration-300 ${isActive ? "font-semibold" : "font-medium"}`}
                   >
                     {child.title}
                   </span>

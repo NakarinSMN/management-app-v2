@@ -4,7 +4,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 // 1. Lazy Import
 const HomePage = lazy(() => import("../HomePage/HomePage"));
 const VehicleTax = lazy(() => import("../VehicleTax/VehicleTax"));
-const NotificationBoard = lazy(() => import("../NotificationBoard/NotificationBoard"));
+const NotificationBoard = lazy(
+  () => import("../NotificationBoard/NotificationBoard"),
+);
 const InsuranceWork = lazy(() => import("../InsuranceWork/InsuranceWork"));
 const TaxCoverSheet = lazy(() => import("../TaxCoverSheet/TaxCoverSheet"));
 const CarBill = lazy(() => import("../Billing/CarBill"));
@@ -16,39 +18,44 @@ const SheetInsurance = lazy(() => import("../SheetInsurance/SheetInsurance"));
 
 // 2. รับ isAuthenticated เข้ามา
 export default function Contents({ isAuthenticated }) {
-  return (
-    <div className="p-8 h-full overflow-y-auto custom-scrollbar">
-      <div className="transition-all duration-300">
-        <Suspense
-          fallback={
-            <div className="flex flex-col items-center justify-center p-20 text-gray-400 animate-pulse">
-              <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-              <p className="text-sm">กำลังดึงข้อมูลหน้าเว็บ...</p>
-            </div>
-          }
-        >
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            
-            {/* 3. ส่ง isAuthenticated ต่อไปให้หน้า VehicleTax */}
-            <Route 
-              path="/vehicle-tax" 
-              element={<VehicleTax isAuthenticated={isAuthenticated} />} 
-            />
-            
-            <Route path="/notification-board" element={<NotificationBoard />} />
-            <Route path="/insurance-work" element={<InsuranceWork />} />
-            <Route path="/tax-cover-sheet" element={<TaxCoverSheet />} />
-            <Route path="/insurance" element={<SheetInsurance />} />
-            <Route path="/car-bill" element={<CarBill />} />
-            <Route path="/motorcycle-bill" element={<MotorcycleBill />} />
-            <Route path="/orther-bill" element={<OrtherBill />} />
-            <Route path="/items" element={<ItemsShop />} />
-            <Route path="/developer-page" element={<DevPage />} />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+
+  return (
+    <div className=" p-5 ">
+      <div className=" h-screen max-h-screen">
+        <div className="transition-all duration-300 ">
+          <Suspense
+            fallback={
+              <div className="flex flex-col items-center justify-center p-20 text-gray-400 animate-pulse">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+                <p className="text-sm">กำลังดึงข้อมูลหน้าเว็บ...</p>
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+
+              {/* 3. ส่ง isAuthenticated ต่อไปให้หน้า VehicleTax */}
+              <Route
+                path="/vehicle-tax"
+                element={<VehicleTax isAuthenticated={isAuthenticated} />}
+              />
+
+              <Route path="/notification-board" element={<NotificationBoard />} />
+
+              <Route path="/insurance-work" element={<InsuranceWork />} />
+              <Route path="/tax-cover-sheet" element={<TaxCoverSheet />} />
+              <Route path="/insurance" element={<SheetInsurance />} />
+              <Route path="/car-bill" element={<CarBill />} />
+              <Route path="/motorcycle-bill" element={<MotorcycleBill />} />
+              <Route path="/orther-bill" element={<OrtherBill />} />
+              <Route path="/items" element={<ItemsShop />} />
+              <Route path="/developer-page" element={<DevPage />} />
+
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </div>
       </div>
     </div>
   );

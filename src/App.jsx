@@ -1,5 +1,6 @@
-import { useState, lazy, useEffect, Suspense } from "react";
+import { useState, lazy, Suspense } from "react";
 import { ArrowRight, Lock, Command, X, ShieldCheck } from "lucide-react";
+import DashboardLoader from "./components/Loading/DashboardLoader";
 
 const Contents = lazy(() => import('./page/Contents/Contents'));
 const Menu = lazy(() => import('./components/Menu/Menu'));
@@ -7,7 +8,7 @@ const Toast = lazy(() => import('./components/Notify/Toast'));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("home");
-  
+
   // 1. สถานะ "เข้าสู่หน้าเว็บ" (ให้คนนอกเข้ามาดูได้)
   const [isEntered, setIsEntered] = useState(() => {
     return sessionStorage.getItem("is_entered") === "true";
@@ -16,6 +17,12 @@ export default function App() {
   // 2. สถานะ "ล็อกอินแล้ว" (สำหรับ Admin)
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem("is_auth") === "true";
+  });
+
+  // 🌟 3. สถานะ "ข้อมูลผู้ใช้ปัจจุบัน" (เพื่อระบุ Role)
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = sessionStorage.getItem("current_user");
+    return saved ? JSON.parse(saved) : null;
   });
 
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -27,14 +34,20 @@ export default function App() {
 
   const verifyPassword = (inputPassword) => {
     if (inputPassword === correctPassword) {
+      const adminData = { name: "GOOD DEV", role: "admin" };
+      console.log("Admin Access Granted:", adminData); // Debug log
       setIsAuthenticated(true);
+      setCurrentUser(adminData);
+
       sessionStorage.setItem("is_auth", "true");
+      sessionStorage.setItem("current_user", JSON.stringify(adminData));
+
       setShowLoginModal(false);
       setError(false);
       setShowToast(true);
     } else {
       setError(true);
-      setTimeout(() => setPassword(""), 400); 
+      setTimeout(() => setPassword(""), 400);
     }
   };
 
@@ -43,7 +56,7 @@ export default function App() {
     if (!/^\d*$/.test(value)) return;
 
     setPassword(value);
-    
+
     if (value.length === 6) {
       verifyPassword(value);
     }
@@ -63,30 +76,30 @@ export default function App() {
   // --- 1. หน้า Dashboard (เมื่อกดเข้าเว็บมาแล้ว ไม่ว่าจะ Login หรือไม่) ---
   if (isEntered) {
     return (
-      <div className="flex flex-col h-screen bg-white font-sans animate-in fade-in duration-1000">
+      <div className="flex flex-col h-screen bg-white font-sans animate-in fade-in duration-1000" style={{ fontFamily: '"DB Helvethaica X", sans-serif' }}>
         <Suspense fallback={
-          <div className="flex items-center justify-center h-screen w-full">
-            <div className="animate-pulse text-gray-400 text-sm tracking-widest uppercase">Loading Workspace...</div>
+          <div>
+            <DashboardLoader />
           </div>
         }>
           <div className="flex flex-1 overflow-hidden">
-            
+
             {/* ส่งสถานะ Login และฟังก์ชันเปิด Modal ไปให้ Menu */}
-            <Menu 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab} 
+            <Menu
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
               isAuthenticated={isAuthenticated}
-              onOpenLogin={() => setShowLoginModal(true)} 
+              onOpenLogin={() => setShowLoginModal(true)}
             />
 
-            <main className="flex-1 overflow-y-auto bg-gray-50/30 relative">
-              <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-gray-50 to-transparent pointer-events-none"></div>
-              <div className="relative z-10 h-full">
-                
-                {/* ส่งสถานะ Login ไปให้ Contents เพื่อเปิด/ปิดสิทธิ์การแก้ไขข้อมูล */}
-                <Contents 
-                  activeTab={activeTab} 
-                  isAuthenticated={isAuthenticated} 
+            <main className="flex-1 overflow-y-auto relative">
+              <div className="relative z-10 h-screen overflow-hidden">
+
+                {/* 🌟 ส่งทั้ง isAuthenticated และ currentUser ไปให้ Contents */}
+                <Contents
+                  activeTab={activeTab}
+                  isAuthenticated={isAuthenticated}
+                  currentUser={currentUser}
                 />
               </div>
             </main>
@@ -115,7 +128,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Admin Login</h3>
+                <h3 className="text-[12px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Admin Login</h3>
                 <p className="text-sm font-medium text-gray-800 mb-10">ระบุรหัสส่วนตัวของคุณ (6 หลัก)</p>
 
                 <form onSubmit={handlePasswordSubmit}>
@@ -127,7 +140,7 @@ export default function App() {
                       onChange={handlePasswordChange}
                       maxLength={6}
                       placeholder="••••••"
-                      className={`w-full text-center text-4xl tracking-[0.4em] py-3 border-b-2 bg-transparent focus:outline-none transition-all duration-500 ${error ? 'text-red-500 border-red-200' : 'text-gray-900 border-gray-100 focus:border-gray-900'}`}
+                      className={`w-full text-center text-2xl tracking-[0.4em] py-3 border-b-2 bg-transparent focus:outline-none transition-all duration-500 ${error ? 'text-red-500 border-red-200' : 'text-gray-900 border-gray-100 focus:border-gray-900'}`}
                     />
                     <div className="absolute bottom-0 left-0 h-[2px] bg-blue-500 transition-all duration-300" style={{ width: `${(password.length / 6) * 100}%` }}></div>
                     {error && <p className="absolute -bottom-6 left-0 w-full text-[10px] text-red-500 font-bold uppercase tracking-tighter animate-in fade-in slide-in-from-top-2">รหัสผ่านไม่ถูกต้อง</p>}

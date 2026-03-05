@@ -30,7 +30,7 @@ export default function MenuButton({
     )}
 
     <div className="flex flex-col text-left">
-      <span className={`font-semibold text-sm ${isActive ? "text-blue-700" : "text-slate-700"}`}>
+      <span className={`font-semibold text-xs ${isActive ? "text-blue-700" : "text-slate-700"}`}>
         {title}
       </span>
       <span className={`text-[10px] uppercase leading-tight font-medium ${isActive ? "text-blue-400" : "text-slate-400"}`}>

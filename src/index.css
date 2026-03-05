@@ -2,10 +2,21 @@
 @import "tailwindcss";
 
 
+
 * {
-  font-family: "Kanit", sans-serif;
-  font-style: normal;
+ font-family: "Kanit", sans-serif;
+  letter-spacing: 0.03em;
 }
+/* สร้าง Class พิเศษสำหรับซ่อน Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none; /* สำหรับ Chrome, Safari และ Opera */
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;  /* สำหรับ Internet Explorer และ Edge */
+    scrollbar-width: none;  /* สำหรับ Firefox */
+}
+
 
 @layer base {
   ::-webkit-scrollbar {
@@ -15,18 +26,19 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #111827;
+    border-radius: 10px;
+    background: #ececec;
     /* สีพื้นหลัง track (Match กับ bg-gray-900) */
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #374151;
+    background: #cecece;
     /* สีของตัวเลื่อน (gray-700) */
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #f59e0b;
+    background: #727272;
     /* เปลี่ยนเป็นสีส้ม Amber เมื่อเอาเมาส์ไปชี้ */
   }
 }
@@ -93,6 +105,7 @@
   -webkit-appearance: none;
   margin: 0;
 }
+
 .no-spinners {
   -moz-appearance: textfield;
 }

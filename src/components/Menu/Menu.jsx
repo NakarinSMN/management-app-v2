@@ -29,12 +29,12 @@ const menuList = [
   { id: "home", title: "หน้าหลัก", subtitle: "Home", icon: Home },
   {
     id: "data-tax",
-    title: "งานภาษีข้อมูลลูกค้า",
+    title: "งานภาษีข้อมูลลูกค้า (Beta)",
     subtitle: "Invoice & Tax",
     icon: Tags,
     children: [
-      { id: "vehicle-tax", title: "ต่อภาษีประจำปี", subtitle: "Vehicle Tax" },
-      { id: "notification-board", title: "กระดานแจ้งเตือนต่อภาษี", subtitle: "Notification Board" },
+      { id: "vehicle-tax", title: "ต่อภาษีประจำปี (Beta)", subtitle: "Vehicle Tax" },
+      { id: "notification-board", title: "กระดานแจ้งเตือนต่อภาษี (Beta)", subtitle: "Notification Board" },
     ],
   },
   {
@@ -121,10 +121,10 @@ export default function Menu({ isAuthenticated, onOpenLogin }) {
       )}
 
       {/* Sidebar UI */}
-      <div className="flex flex-col h-screen w-70 bg-slate-50 text-slate-800 shadow-xl border-r border-slate-200 relative">
+      <div className="flex flex-col h-screen w-75 bg-slate-50 text-slate-800 shadow-xl border-r border-slate-200 relative">
         
         {/* Header โลโก้ & User */}
-        <div className="relative h-24 shrink-0 border-b border-blue-100 bg-white flex items-center px-6">
+        <div className="relative h-24 shrink-0 border-b border-blue-100 flex items-center px-6">
           <div className="flex items-center gap-2">
             <CircleUserRound 
               onClick={() => handleNavigate("home")} 
@@ -132,8 +132,8 @@ export default function Menu({ isAuthenticated, onOpenLogin }) {
               size={28} 
             />
             <div className="flex flex-col">
-              <span className="text-md font-bold text-slate-700 tracking-tight">ตรอ.บังรีท่าอิฐ</span>
-              <span className="text-[10px] text-slate-400 uppercase font-medium">
+              <span className="text-sm font-bold text-slate-700 tracking-tight">ตรอ.บังรีท่าอิฐ</span>
+              <span className="text-[9px] text-slate-400 uppercase font-medium">
                 {isAuthenticated ? "Admin Access" : "Guest Mode"}
               </span>
             </div>
