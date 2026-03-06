@@ -4,8 +4,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 // 1. Lazy Import
 const HomePage = lazy(() => import("../HomePage/HomePage"));
 const VehicleTax = lazy(() => import("../VehicleTax/VehicleTax"));
-const NotificationBoard = lazy(
-  () => import("../NotificationBoard/NotificationBoard"),
+const NotiPage = lazy(
+  () => import("../NotificationBoard/NotiPage"),
 );
 const InsuranceWork = lazy(() => import("../InsuranceWork/InsuranceWork"));
 const TaxCoverSheet = lazy(() => import("../TaxCoverSheet/TaxCoverSheet"));
@@ -15,6 +15,7 @@ const OrtherBill = lazy(() => import("../Billing/OrtherBill"));
 const ItemsShop = lazy(() => import("../ItemsShop/ItemsShop"));
 const DevPage = lazy(() => import("../DevPage/DevPage"));
 const SheetInsurance = lazy(() => import("../SheetInsurance/SheetInsurance"));
+import { BellDot, ShieldAlert } from "lucide-react";
 
 // 2. รับ isAuthenticated เข้ามา
 export default function Contents({ isAuthenticated }) {
@@ -41,7 +42,7 @@ export default function Contents({ isAuthenticated }) {
                 element={<VehicleTax isAuthenticated={isAuthenticated} />}
               />
 
-              <Route path="/notification-board" element={<NotificationBoard />} />
+              <Route path="/notification-board" element={<NotiPage />} />
 
               <Route path="/insurance-work" element={<InsuranceWork />} />
               <Route path="/tax-cover-sheet" element={<TaxCoverSheet />} />
