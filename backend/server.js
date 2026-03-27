@@ -13,6 +13,11 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch(err => console.error('❌ DB Error:', err));
 
+// ==========================================
+// 1. Database Models (ตารางข้อมูล)
+// ==========================================
+
+// 📌 Model สำหรับ ลูกค้า
 const customerSchema = new mongoose.Schema({
   sequenceNumber: Number,
   licensePlate: String,
@@ -28,7 +33,20 @@ const customerSchema = new mongoose.Schema({
 
 const Customer = mongoose.model('Customer', customerSchema, 'customers');
 
-// 🌟 1. API ดึงข้อมูล (รีดน้ำหนักข้อมูลขั้นสุด)
+// 🌟 📌 [เพิ่มใหม่] Model สำหรับ ใบปะหน้า
+const coverSheetSchema = new mongoose.Schema({
+  name: String, // เช่น "01-2569"
+  url: String   // ลิงก์ Google Sheet
+}, { timestamps: true });
+
+const CoverSheet = mongoose.model('CoverSheet', coverSheetSchema, 'sheets');
+
+
+// ==========================================
+// 2. API Routes สำหรับ Customers (ลูกค้า)
+// ==========================================
+
+// API ดึงข้อมูลลูกค้า
 app.get('/api/customers', async (req, res) => {
   try {
     const page = parseInt(req.query._page) || 1;
@@ -48,10 +66,9 @@ app.get('/api/customers', async (req, res) => {
 
     const totalCount = await Customer.countDocuments(filter);
     
-    // 🌟 ดึงเฉพาะที่ต้องใช้ และแปลงเป็น JSON ธรรมดา
     const data = await Customer.find(filter)
-      .select('sequenceNumber licensePlate customerName phone vehicleType brand registerDate inspectionDate status tags') // ไม่เอา createdAt, updatedAt, userId
-      .lean() // ไม่ห่อ Mongoose Object ทำให้ประมวลผลไวขึ้นและเบาลง
+      .select('sequenceNumber licensePlate customerName phone vehicleType brand registerDate inspectionDate status tags') 
+      .lean() 
       .sort({ sequenceNumber: -1 })
       .skip(skip)
       .limit(limit);
@@ -67,21 +84,18 @@ app.get('/api/customers', async (req, res) => {
   }
 });
 
-// 🌟 2. API เพิ่มข้อมูล (พร้อมระบบทำความสะอาด)
+// API เพิ่มข้อมูลลูกค้า
 app.post('/api/customers', async (req, res) => {
   try {
     const lastItem = await Customer.findOne().sort({ sequenceNumber: -1 });
     const nextSeq = lastItem && lastItem.sequenceNumber ? lastItem.sequenceNumber + 1 : 1;
     
-    // 🌟 คัดลอกข้อมูลที่ส่งมาก่อนทำการล้าง
     let cleanData = { ...req.body };
 
-    // 🌟 แปลงเบอร์โทรเป็นข้อความ (String) ป้องกันกรณีส่งมาเป็นตัวเลข
     if (cleanData.phone) {
       cleanData.phone = String(cleanData.phone);
     }
 
-    // 🌟 ลบฟิลด์ที่เป็นค่าว่าง "" ทิ้งไป จะได้ไม่เปลืองพื้นที่ใน Database
     Object.keys(cleanData).forEach(key => {
       if (cleanData[key] === "") {
         delete cleanData[key];
@@ -96,15 +110,13 @@ app.post('/api/customers', async (req, res) => {
   }
 });
 
-
-// 🌟 3. API แก้ไขข้อมูล (PUT)
+// API แก้ไขข้อมูลลูกค้า
 app.put('/api/customers/:id', async (req, res) => {
   try {
-    // หาข้อมูลด้วย _id และอัปเดตข้อมูลใหม่ทับลงไป
     const updatedDoc = await Customer.findByIdAndUpdate(
       req.params.id, 
       req.body, 
-      { new: true } // ให้ส่งข้อมูลตัวใหม่กลับมา
+      { new: true } 
     );
     res.json({ success: true, data: updatedDoc });
   } catch (err) {
@@ -112,10 +124,9 @@ app.put('/api/customers/:id', async (req, res) => {
   }
 });
 
-// 🌟 4. API ลบข้อมูล (DELETE)
+// API ลบข้อมูลลูกค้า
 app.delete('/api/customers/:id', async (req, res) => {
   try {
-    // หาข้อมูลด้วย _id แล้วลบทิ้ง
     await Customer.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (err) {
@@ -124,6 +135,29 @@ app.delete('/api/customers/:id', async (req, res) => {
 });
 
 
+// ==========================================
+// 🌟 3. [เพิ่มใหม่] API Routes สำหรับ Cover Sheets (ใบปะหน้า)
+// ==========================================
+
+// API ดึงข้อมูลใบปะหน้าทั้งหมดไปแสดงในแท็บ
+app.get('/api/coversheets', async (req, res) => {
+  try {
+    // ดึงข้อมูลทั้งหมด และเรียงชื่อตามลำดับ (เช่น 01, 02, 03)
+    const data = await CoverSheet.find().lean().sort({ name: 1 });
+    
+    res.json({ 
+      success: true, 
+      data: data 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+// ==========================================
+// 4. Start Server
+// ==========================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 API running on port ${PORT}`));
 

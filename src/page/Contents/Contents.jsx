@@ -23,7 +23,7 @@ export default function Contents({ isAuthenticated }) {
 
   return (
     <div className=" p-5 ">
-      <div className=" h-screen max-h-screen">
+      <div className=" h-screen max-h-screen overflow-x-auto">
         <div className="transition-all duration-300 ">
           <Suspense
             fallback={
