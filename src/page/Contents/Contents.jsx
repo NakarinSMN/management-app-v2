@@ -45,7 +45,11 @@ export default function Contents({ isAuthenticated }) {
               <Route path="/notification-board" element={<NotiPage />} />
 
               <Route path="/insurance-work" element={<InsuranceWork />} />
-              <Route path="/tax-cover-sheet" element={<TaxCoverSheet />} />
+
+
+              <Route path="/tax-cover-sheet" element={<TaxCoverSheet isAuthenticated={isAuthenticated} />} />
+
+
               <Route path="/insurance" element={<SheetInsurance />} />
               <Route path="/car-bill" element={<CarBill />} />
               <Route path="/motorcycle-bill" element={<MotorcycleBill />} />

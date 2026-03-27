@@ -1,26 +1,66 @@
-import React, { useEffect } from 'react';
-import DashboardLoader from '../../components/Loading/DashboardLoader';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { FileSpreadsheet, Calendar, Plus, Sheet, X, Inbox } from 'lucide-react';
-import GlobalDropdown from '../../components/GlobalButton/GlobalDropdown';
 
-// 🌟 Import Store ที่เราเพิ่งสร้าง (แก้ Path ให้ตรงกับโปรเจกต์คุณด้วยนะครับ)
+
+const DashboardLoader = lazy(() => import('../../components/Loading/DashboardLoader'));
+const GlobalDropdown = lazy(() => import('../../components/GlobalButton/GlobalDropdown'));
 import { useCoverSheetStore } from '../../store/useCoverSheetStore';
+const Toast = lazy(() => import('../../components/Notify/Toast'));
+const ConfirmDialog = lazy(() => import('../../components/Notify/ConfirmDialog'));
+const AddSheets = lazy(() => import('./Modal/AddSheets'));
 
-export default function TaxCoverSheet() {
-  // 🌟 ดึง State และ Actions ออกมาจาก Zustand
-  const { 
-    sheetData, 
-    isLoading, 
-    activeTab, 
-    setActiveTab, 
-    fetchCoverSheets 
+
+
+
+export default function TaxCoverSheet({ isAuthenticated }) {
+
+  const [toast, setToast] = useState({ isOpen: false, type: "success", message: "", subMessage: "" });
+
+  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: "", message: "", onConfirm: null, isDestructive: false, confirmText: "" });
+
+  const {
+    sheetData,
+    isLoading,
+    activeTab,
+    setActiveTab,
+    fetchCoverSheets,
+    deleteCoverSheet
   } = useCoverSheetStore();
 
-  const tabs = ['01-2569', '02-2569', '03-2569', '04-2569', '05-2569', '06-2569', '07-2569', '08-2569', '09-2569', '10-2569', '11-2569', '12-2569'];
+  const handleDeleteTab = (e, tabName) => {
+    e.stopPropagation();
+    setConfirmDialog({
+      isOpen: true,
+      title: "ยืนยันการลบ",
+      message: `คุณแน่ใจหรือไม่ว่าต้องการลบใบปะหน้าเดือน "${tabName}" ?\nข้อมูลนี้ไม่สามารถกู้คืนได้`,
+      isDestructive: true,
+      confirmText: "ลบทิ้ง",
+      onConfirm: async () => {
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+        const res = await deleteCoverSheet(tabName);
+        if (res.success) {
+          setToast({
+            isOpen: true,
+            type: "success",
+            message: "ลบข้อมูลสำเร็จ!",
+            subMessage: `ใบปะหน้าเดือน ${tabName} ถูกลบเรียบร้อยแล้ว`
+          });
+        } else {
+          setToast({
+            isOpen: true,
+            type: "error",
+            message: "เกิดข้อผิดพลาด",
+            subMessage: res.error || "ไม่สามารถลบข้อมูลได้ในขณะนี้"
+          });
+        }
+      }
+    });
+  };
 
   const hasActiveSheet = sheetData.some(sheet => sheet.id === activeTab);
 
-  // 🌟 สั่งให้ดึงข้อมูลจาก API แค่ครั้งเดียวตอนเปิดหน้าเว็บ
+  const [isModalOpen, setisModalOpen] = useState(false);
+
   useEffect(() => {
     fetchCoverSheets();
   }, [fetchCoverSheets]);
@@ -30,13 +70,13 @@ export default function TaxCoverSheet() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-6 md:p-8 font-sans">
+    <div className="min-h-screen  p-2 md:p-4 font-sans">
 
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4">
           <div className="text-blue-500 mt-1">
-            <FileSpreadsheet size={32} strokeWidth={2.2} />
+            <FileSpreadsheet size={40} strokeWidth={2.2} />
           </div>
           <div>
             <div className='flex flex-wrap gap-4 items-center mb-1.5'>
@@ -57,30 +97,40 @@ export default function TaxCoverSheet() {
           </div>
         </div>
 
-        <button className="flex items-center gap-3 px-6 py-3 bg-gray-950 text-white rounded-3xl shadow-md hover:bg-gray-800 hover:-translate-y-0.5 transition-all active:scale-95 whitespace-nowrap flex-none">
-          <Plus size={18} strokeWidth={3} />
-          <div className="flex flex-col text-left">
-            <span className="text-sm font-bold leading-tight">เพิ่มใบปะหน้า</span>
-            <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest mt-0.5">Add Cover Sheet</span>
-          </div>
-        </button>
+        {isAuthenticated && (
+          <button
+            onClick={() => setisModalOpen(true)}
+            className="flex items-center gap-3 px-6 py-3 bg-gray-950 text-white rounded-3xl shadow-md hover:bg-gray-800 hover:-translate-y-0.5 transition-all active:scale-95 whitespace-nowrap flex-none"
+          >
+            <Plus size={18} strokeWidth={3} />
+            <div className="flex flex-col text-left">
+              <span className="text-sm font-bold leading-tight">เพิ่มใบปะหน้า</span>
+              <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-widest mt-0.5">Add Cover Sheet</span>
+            </div>
+          </button>
+        )}
       </div>
 
-      {/* Navbar / Tabs Area */}
+
       <div className="flex items-center gap-6 mb-6 border-b border-gray-200 overflow-x-auto pb-0.5 [&::-webkit-scrollbar]:hidden">
-        {tabs.map((tab) => (
+        {sheetData.map((sheet) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`relative flex items-center gap-2 pb-3 text-sm transition-all whitespace-nowrap -mb-[2px] ${
-              activeTab === tab
-                ? 'text-gray-900 font-bold border-b-2 border-gray-900'
-                : 'text-gray-400 font-medium border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300'
-            }`}
+            key={sheet.id}
+            onClick={() => setActiveTab(sheet.id)}
+            className={`relative flex items-center gap-2 pb-3 text-sm transition-all whitespace-nowrap -mb-[2px] ${activeTab === sheet.id
+              ? 'text-gray-900 font-bold border-b-2 border-gray-900'
+              : 'text-gray-400 font-medium border-b-2 border-transparent hover:text-gray-600 hover:border-gray-300'
+              }`}
           >
-            {tab}
-            {activeTab === tab && (
-              <span className="p-0.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
+            {sheet.id}
+
+            {/* 🌟 จุดที่ 2: เช็ค isAuthenticated เพื่อโชว์ปุ่ม "กากบาท (ลบ)" */}
+            {isAuthenticated && activeTab === sheet.id && (
+              <span
+                onClick={(e) => handleDeleteTab(e, sheet.id)}
+                className="p-0.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                title="ลบใบปะหน้านี้"
+              >
                 <X size={14} strokeWidth={2.5} />
               </span>
             )}
@@ -109,7 +159,7 @@ export default function TaxCoverSheet() {
                 title={sheet.title}
                 loading="lazy"
                 allowFullScreen
-                className="w-full h-full absolute top-0 left-0"
+                className="w-full h-[calc(100%+45px)] -top-[45px] left-0 absolute"
               ></iframe>
             </div>
           ))}
@@ -122,6 +172,37 @@ export default function TaxCoverSheet() {
           )}
         </div>
       </div>
+
+      <Suspense fallback={null}>
+
+
+        <AddSheets
+          isOpen={isModalOpen}
+          onClose={() => setisModalOpen(false)}
+        />
+      </Suspense>
+
+      <Toast
+        isOpen={toast.isOpen}
+        onClose={() => setToast({ ...toast, isOpen: false })}
+        type={toast.type}
+        message={toast.message}
+        subMessage={toast.subMessage}
+      />
+
+
+
+      {/* 🌟 วาง ConfirmDialog ไว้ตรงกลางจอ (ถ้าคุณมี Component นี้แล้ว) */}
+      {confirmDialog.isOpen && (
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+          onConfirm={confirmDialog.onConfirm}
+          isDestructive={true}
+        />
+      )}
 
     </div>
   );

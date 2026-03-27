@@ -24,6 +24,7 @@ import {
   vehicleTypes,
   carBrands,
 } from "../../../utils/constants";
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VehicleFormModal({
   isOpen,
@@ -343,13 +344,26 @@ export default function VehicleFormModal({
 
   return (
     <>
+      {/* 🌟 Main Modal */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <div
-          className="absolute inset-0 bg-white/60 backdrop-blur-md animate-in fade-in duration-500"
+        {/* พื้นหลัง (Backdrop) */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="absolute inset-0 bg-white/60 backdrop-blur-md"
           onClick={onClose}
-        ></div>
+        />
 
-        <div className="relative bg-white w-full max-w-2xl rounded-3xl border border-gray-100 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] p-8 md:p-10 animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">
+        {/* ตัวกล่องฟอร์มหลัก */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 30 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="relative bg-white w-full max-w-2xl rounded-3xl border border-gray-100 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] p-8 md:p-10"
+        >
           {isCheckingPlate && (
             <div className="absolute top-0 inset-x-0 h-1.5 bg-blue-50 overflow-hidden rounded-t-[2.5rem] z-50">
               <div className="w-full h-full bg-blue-500 origin-left animate-pulse"></div>
@@ -371,7 +385,7 @@ export default function VehicleFormModal({
               </p>
             </div>
 
-            {/* 🌟 แสดงปุ่มลบ เฉพาะเมื่อส่ง initialData เข้ามาตั้งแต่แรก (โหมด Edit เต็มตัว) */}
+            {/* ปุ่มลบ */}
             {isEditMode && (
               <button
                 type="button"
@@ -396,12 +410,14 @@ export default function VehicleFormModal({
               </div>
             )}
           </div>
+
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-300 hover:text-gray-900 transition-colors"
+            className="absolute top-4 right-4 text-gray-300 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-full transition-all active:scale-90"
           >
             <X size={20} />
           </button>
+
           <form
             onSubmit={handleSubmit}
             className="grid custom-scrollbar p-4 overflow-y-auto max-h-[65vh] grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5"
@@ -417,55 +433,54 @@ export default function VehicleFormModal({
                 onChange={handleChange}
                 onBlur={handleCheckDuplicatePlate}
                 type="text"
-                placeholder={
-                  isEditMode ? "" : "พิมพ์ทะเบียนรถแล้วคลิกช่องอื่น..."
-                }
+                placeholder={isEditMode ? "" : "พิมพ์ทะเบียนรถแล้วคลิกช่องอื่น..."}
                 className={`px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm outline-none transition-all border focus:ring-0 ${duplicateRecord ? "ring-2 ring-orange-400 bg-orange-50" : "focus:bg-white focus:border-blue-500"}`}
               />
             </div>
 
-            {duplicateRecord && (
-              <div className="md:col-span-2 bg-orange-50 border border-orange-200 p-5 rounded-2xl flex flex-col gap-4 mb-2 animate-in slide-in-from-top-2">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle
-                    className="text-orange-500 shrink-0 mt-0.5"
-                    size={24}
-                  />
-                  <div>
-                    <h4 className="text-[15px] font-black text-orange-800 tracking-wide">
-                      พบประวัติทะเบียน "{duplicateRecord.licensePlate}"
-                      ในระบบแล้ว!
-                    </h4>
-                    <p className="text-[13px] text-orange-700 mt-1">
-                      ลูกค้า <b>{duplicateRecord.customerName || "-"}</b>{" "}
-                      (ยี่ห้อ: {duplicateRecord.brand || "-"})
-                    </p>
+            {/* 🌟 AnimatePresence สำหรับตอนที่กล่องแจ้งเตือนเด้งขึ้นมาและหายไป */}
+            <AnimatePresence>
+              {duplicateRecord && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -10, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="md:col-span-2 bg-orange-50 border border-orange-200 p-5 rounded-2xl flex flex-col gap-4 mb-2 overflow-hidden"
+                >
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="text-orange-500 shrink-0 mt-0.5" size={24} />
+                    <div>
+                      <h4 className="text-[15px] font-black text-orange-800 tracking-wide">
+                        พบประวัติทะเบียน "{duplicateRecord.licensePlate}" ในระบบแล้ว!
+                      </h4>
+                      <p className="text-[13px] text-orange-700 mt-1">
+                        ลูกค้า <b>{duplicateRecord.customerName || "-"}</b>{" "}
+                        (ยี่ห้อ: {duplicateRecord.brand || "-"})
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={handleLoadExisting}
-                    className="flex flex-col items-center justify-center p-3 bg-white border border-orange-200 hover:bg-orange-100 hover:border-orange-400 rounded-xl text-orange-700 transition-all shadow-sm"
-                  >
-                    <RefreshCw size={20} className="mb-1.5 text-orange-500" />
-                    <span className="text-xs font-black text-center">
-                      ดึงข้อมูลเดิมมาแก้
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={submitAsNew}
-                    className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 hover:bg-gray-100 hover:border-gray-400 rounded-xl text-gray-700 transition-all shadow-sm"
-                  >
-                    <CopyPlus size={20} className="mb-1.5 text-gray-500" />
-                    <span className="text-xs font-black text-center">
-                      บันทึกเป็นคันใหม่ซ้ำ
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={handleLoadExisting}
+                      className="flex flex-col items-center justify-center p-3 bg-white border border-orange-200 hover:bg-orange-100 hover:border-orange-400 rounded-xl text-orange-700 transition-all shadow-sm active:scale-[0.98]"
+                    >
+                      <RefreshCw size={20} className="mb-1.5 text-orange-500" />
+                      <span className="text-xs font-black text-center">ดึงข้อมูลเดิมมาแก้</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={submitAsNew}
+                      className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 hover:bg-gray-100 hover:border-gray-400 rounded-xl text-gray-700 transition-all shadow-sm active:scale-[0.98]"
+                    >
+                      <CopyPlus size={20} className="mb-1.5 text-gray-500" />
+                      <span className="text-xs font-black text-center">บันทึกเป็นคันใหม่ซ้ำ</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
@@ -476,9 +491,7 @@ export default function VehicleFormModal({
                 options={vehicleTypes}
                 value={formData.vehicleType}
                 icon={Car}
-                onChange={(val) =>
-                  setFormData((prev) => ({ ...prev, vehicleType: val }))
-                }
+                onChange={(val) => setFormData((prev) => ({ ...prev, vehicleType: val }))}
               />
             </div>
 
@@ -492,9 +505,7 @@ export default function VehicleFormModal({
                 value={formData.brand}
                 icon={Tag}
                 isSearchable={true}
-                onChange={(val) =>
-                  setFormData((prev) => ({ ...prev, brand: val }))
-                }
+                onChange={(val) => setFormData((prev) => ({ ...prev, brand: val }))}
               />
             </div>
 
@@ -506,18 +517,14 @@ export default function VehicleFormModal({
                 <div className="flex bg-gray-100 p-1 rounded-xl">
                   <button
                     type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, customerType: "บุคคล" })
-                    }
+                    onClick={() => setFormData({ ...formData, customerType: "บุคคล" })}
                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${formData.customerType === "บุคคล" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                   >
                     <User size={14} /> บุคคล
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, customerType: "บริษัท" })
-                    }
+                    onClick={() => setFormData({ ...formData, customerType: "บริษัท" })}
                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${formData.customerType === "บริษัท" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                   >
                     <Building2 size={14} /> บริษัท
@@ -573,18 +580,14 @@ export default function VehicleFormModal({
                 <div className="flex bg-gray-100 p-1 rounded-xl">
                   <button
                     type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, contactType: "ทั่วไป" })
-                    }
+                    onClick={() => setFormData({ ...formData, contactType: "ทั่วไป" })}
                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${formData.contactType === "ทั่วไป" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                   >
                     <PhoneCall size={14} /> ติดต่อโดยตรง
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, contactType: "ตัวแทน" })
-                    }
+                    onClick={() => setFormData({ ...formData, contactType: "ตัวแทน" })}
                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${formData.contactType === "ตัวแทน" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
                   >
                     <Users size={14} /> ผ่านตัวแทน (Beta)
@@ -593,28 +596,33 @@ export default function VehicleFormModal({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {formData.contactType === "ตัวแทน" && (
-                  <div className="flex flex-col gap-1.5 animate-in fade-in slide-in-from-left-2">
-                    <label className="text-[10px] font-black text-gray-500 uppercase ml-1">
-                      ชื่อตัวแทน{" "}
-                      <span className="text-blue-400">
-                        (จะถูกบันทึกในหมายเหตุ)
-                      </span>
-                    </label>
-                    <input
-                      name="agentName"
-                      value={formData.agentName}
-                      onChange={handleChange}
-                      type="text"
-                      placeholder="ชื่อเซลส์ หรือ ผู้รับมอบอำนาจ"
-                      className="px-4 py-2.5 bg-white border-transparent rounded-xl text-sm focus:border-blue-500 outline-none transition-all border focus:ring-0 shadow-sm"
-                    />
-                  </div>
-                )}
+                {/* 🌟 AnimatePresence สำหรับตอนที่สลับโหมดผู้ติดต่อเป็น 'ตัวแทน' */}
+                <AnimatePresence>
+                  {formData.contactType === "ตัวแทน" && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex flex-col gap-1.5"
+                    >
+                      <label className="text-[10px] font-black text-gray-500 uppercase ml-1">
+                        ชื่อตัวแทน{" "}
+                        <span className="text-blue-400">(จะถูกบันทึกในหมายเหตุ)</span>
+                      </label>
+                      <input
+                        name="agentName"
+                        value={formData.agentName}
+                        onChange={handleChange}
+                        type="text"
+                        placeholder="ชื่อเซลส์ หรือ ผู้รับมอบอำนาจ"
+                        className="px-4 py-2.5 bg-white border-transparent rounded-xl text-sm focus:border-blue-500 outline-none transition-all border focus:ring-0 shadow-sm"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                <div
-                  className={`flex flex-col gap-1.5 ${formData.contactType === "ทั่วไป" ? "md:col-span-2" : ""}`}
-                >
+                <div className={`flex flex-col gap-1.5 transition-all duration-300 ${formData.contactType === "ทั่วไป" ? "md:col-span-2" : ""}`}>
                   <div className="flex justify-between items-center ml-1">
                     <label className="text-[10px] font-black text-gray-500 uppercase">
                       เบอร์โทรศัพท์
@@ -684,9 +692,7 @@ export default function VehicleFormModal({
               />
             </div>
 
-            <div
-              className={`flex flex-col gap-1.5 transition-all duration-300 ${!isTroSelected ? "opacity-40 grayscale pointer-events-none" : "opacity-100"}`}
-            >
+            <div className={`flex flex-col gap-1.5 transition-all duration-300 ${!isTroSelected ? "opacity-40 grayscale pointer-events-none" : "opacity-100"}`}>
               <label className="text-[10px] font-black text-gray-400 uppercase ml-1 flex items-center gap-1">
                 <Calendar size={10} /> วันตรวจสภาพ (ตรอ.)
               </label>
@@ -713,6 +719,7 @@ export default function VehicleFormModal({
                 className="px-4 py-3 bg-gray-50 border-transparent rounded-2xl text-sm focus:bg-white focus:border-blue-500 outline-none transition-all border focus:ring-0 resize-none"
               />
             </div>
+
             {!duplicateRecord && (
               <div className="md:col-span-2 mt-6 flex gap-3">
                 <button
@@ -725,75 +732,78 @@ export default function VehicleFormModal({
                 <button
                   disabled={isSubmitting || isCheckingPlate}
                   type="submit"
-                  className={`flex-[2] py-4 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-blue-600 transition-all active:scale-95 shadow-xl disabled:bg-gray-400 ${targetEditId ? "bg-blue-600 shadow-blue-200" : "bg-gray-900 shadow-gray-200"}`}
+                  className={`flex-[2] py-4 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-xl disabled:bg-gray-400 ${targetEditId ? "bg-blue-600 shadow-blue-200 hover:bg-blue-700" : "bg-gray-900 shadow-gray-200 hover:bg-gray-800"}`}
                 >
                   {isSubmitting ? (
                     <Loader2 size={18} className="animate-spin" />
                   ) : (
                     <Save size={18} />
                   )}
-                  {saveButtonText}
+                  {saveButtonText || (targetEditId ? "บันทึกการแก้ไข" : "บันทึกข้อมูล")}
                 </button>
               </div>
             )}
           </form>
-        </div>
+        </motion.div>
       </div>
 
-      {/* 🌟 Custom Confirm Dialog (สีจะเปลี่ยนตาม isDestructive) */}
-      {confirmDialog.isOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
-            onClick={() =>
-              setConfirmDialog({ ...confirmDialog, isOpen: false })
-            }
-          ></div>
-          <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in zoom-in-95 duration-200">
-            <div
-              className={`flex items-center gap-3 mb-4 ${confirmDialog.isDestructive ? "text-red-600" : "text-orange-600"}`}
+      {/* 🌟 Custom Confirm Dialog */}
+      <AnimatePresence>
+        {confirmDialog.isOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            {/* Backdrop ของ Confirm Dialog */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+              onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+            />
+
+            {/* กล่อง Confirm Dialog */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6"
             >
-              <div
-                className={`p-2 rounded-full ${confirmDialog.isDestructive ? "bg-red-100" : "bg-orange-100"}`}
-              >
-                <AlertTriangle
-                  size={24}
-                  className={
-                    confirmDialog.isDestructive
-                      ? "text-red-500"
-                      : "text-orange-500"
-                  }
-                />
+              <div className={`flex items-center gap-3 mb-4 ${confirmDialog.isDestructive ? "text-red-600" : "text-orange-600"}`}>
+                <div className={`p-2 rounded-full ${confirmDialog.isDestructive ? "bg-red-100" : "bg-orange-100"}`}>
+                  <AlertTriangle
+                    size={24}
+                    className={confirmDialog.isDestructive ? "text-red-500" : "text-orange-500"}
+                  />
+                </div>
+                <h3 className="text-lg font-black">{confirmDialog.title}</h3>
               </div>
-              <h3 className="text-lg font-black">{confirmDialog.title}</h3>
-            </div>
-            <p className="text-[14px] text-gray-600 whitespace-pre-line mb-6 leading-relaxed">
-              {confirmDialog.message}
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() =>
-                  setConfirmDialog({ ...confirmDialog, isOpen: false })
-                }
-                className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                onClick={confirmDialog.onConfirm}
-                className={`px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-colors shadow-lg active:scale-95 ${confirmDialog.isDestructive
-                    ? "bg-red-500 hover:bg-red-600 shadow-red-200"
-                    : "bg-orange-500 hover:bg-orange-600 shadow-orange-200"
-                  }`}
-              >
-                {confirmDialog.confirmText}
-              </button>
-            </div>
+              <p className="text-[14px] text-gray-600 whitespace-pre-line mb-6 leading-relaxed">
+                {confirmDialog.message}
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+                  className="px-5 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-colors active:scale-95"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDialog.onConfirm}
+                  className={`px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-all shadow-lg active:scale-95 ${confirmDialog.isDestructive
+                      ? "bg-red-500 hover:bg-red-600 shadow-red-200"
+                      : "bg-orange-500 hover:bg-orange-600 shadow-orange-200"
+                    }`}
+                >
+                  {confirmDialog.confirmText}
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </>
   );
 }
